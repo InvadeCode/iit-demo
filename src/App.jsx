@@ -201,36 +201,12 @@ const RevealText = ({ text, className = '', delay = 0 }) => {
   );
 };
 
-const SplitHeroText = ({ line1, line2 }) => {
-  const [ref, isVisible] = useOnScreen({ threshold: 0.1 });
-  return (
-    <div ref={ref} className="relative w-full pointer-events-none mt-12 md:mt-24 z-10">
-      {/* Hollow Layer (Visible on right side over image) */}
-      <div className="text-[18vw] md:text-[14vw] lg:text-[12vw] leading-[0.85] tracking-tighter font-thin uppercase text-hollow-white flex flex-col">
-        <div className="overflow-hidden pb-2 md:pb-4"><div className={`transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'translate-y-0' : 'translate-y-[100%]'}`}>{line1}</div></div>
-        <div className="overflow-hidden pb-2 md:pb-4"><div className={`transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] delay-100 ${isVisible ? 'translate-y-0' : 'translate-y-[100%]'}`}>{line2}</div></div>
-      </div>
-      {/* Solid Layer (Clipped strictly to the left 50% white background) */}
-      <div className="absolute top-0 left-0 w-full h-full text-[18vw] md:text-[14vw] lg:text-[12vw] leading-[0.85] tracking-tighter font-thin uppercase text-zinc-950 flex flex-col hidden md:flex" style={{ clipPath: 'inset(0 50% 0 0)' }}>
-        <div className="overflow-hidden pb-2 md:pb-4"><div className={`transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'translate-y-0' : 'translate-y-[100%]'}`}>{line1}</div></div>
-        <div className="overflow-hidden pb-2 md:pb-4"><div className={`transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] delay-100 ${isVisible ? 'translate-y-0' : 'translate-y-[100%]'}`}>{line2}</div></div>
-      </div>
-      {/* Mobile Solid Layer */}
-      <div className="absolute top-0 left-0 w-full h-full text-[18vw] md:text-[14vw] lg:text-[12vw] leading-[0.85] tracking-tighter font-thin uppercase text-zinc-950 flex flex-col md:hidden">
-        <div className="overflow-hidden pb-2 md:pb-4"><div className={`transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] ${isVisible ? 'translate-y-0' : 'translate-y-[100%]'}`}>{line1}</div></div>
-        <div className="overflow-hidden pb-2 md:pb-4"><div className={`transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] delay-100 ${isVisible ? 'translate-y-0' : 'translate-y-[100%]'}`}>{line2}</div></div>
-      </div>
-    </div>
-  );
-};
-
-const Accordion = ({ question, answer }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const Accordion = ({ question, answer, isOpen, onClick }) => {
   return (
     <div className="border-b border-zinc-200">
       <Interactive>
         <button 
-          onClick={() => setIsOpen(!isOpen)} 
+          onClick={onClick} 
           className="w-full py-8 flex justify-between items-center text-left focus:outline-none"
         >
           <span className="text-xl md:text-3xl font-light text-zinc-950">{question}</span>
@@ -421,42 +397,42 @@ Keep the tone ultra-premium, confident, and concise. Use simple plain text with 
 const HomePage = ({ navigate }) => {
   const [hoveredProject, setHoveredProject] = useState(projectsData[0].image);
   const [activeDetail, setActiveDetail] = useState(0);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   return (
     <div className="animate-in fade-in duration-1000 bg-[#fafafa]">
       
       {/* Hero Section */}
-      <section className="relative h-screen min-h-[700px] flex flex-col w-full overflow-hidden">
-        {/* 50/50 Split Background */}
-        <div className="absolute inset-0 flex z-0">
-          <div className="w-[100%] md:w-[50%] h-full bg-white"></div>
-          <div className="hidden md:block w-[50%] h-full relative overflow-hidden bg-zinc-950">
-            <HeroImageReveal 
-              src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
-              alt="Hero Architecture" 
-              className="w-full h-full"
-            />
-            {/* Dark color overlay for contrast against white text */}
-            <div className="absolute inset-0 bg-zinc-950/40 pointer-events-none"></div>
-            {/* Soft gradient edge blend */}
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/80 via-transparent to-transparent pointer-events-none"></div>
+      <section className="relative h-screen min-h-[700px] flex flex-col w-full overflow-hidden justify-end pb-12 md:pb-16 px-[3%]">
+        {/* Cinematic Video Background */}
+        <div className="absolute inset-0 z-0 bg-zinc-950">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-60 scale-105"
+            src="https://video.wixstatic.com/video/548938_44a59f7f875641ef8e61ad3cc16fcdd0/1080p/mp4/file.mp4"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-zinc-950/40"></div>
+        </div>
+
+        {/* New Hero Content */}
+        <div className="w-full max-w-[1600px] mx-auto z-10 flex flex-col">
+          <RevealText text="AUCKLAND'S PREMIER RESIDENTIAL DEVELOPER" className="text-xs md:text-sm tracking-[0.3em] uppercase text-zinc-300 font-semibold mb-6" />
+          <div className="text-5xl md:text-7xl lg:text-[7vw] font-light tracking-tight text-white mb-8 md:mb-16 max-w-5xl leading-[1.1]">
+            <RevealText text="Crafting Auckland's" />
+            <RevealText text="finest homes." delay={100} />
           </div>
-        </div>
-
-        {/* Giant Split Text Component using Uniform Left Padding */}
-        <div className="flex-1 flex flex-col justify-center w-full max-w-[1600px] mx-auto px-[3%] z-10">
-          <SplitHeroText line1="PROVEN" line2="EXCELLENCE" />
-        </div>
-
-        {/* Subtext and Explore Button */}
-        <div className="w-full max-w-[1600px] mx-auto px-[3%] z-20 flex flex-col md:flex-row justify-between items-start md:items-end pb-12">
-          <RevealText delay={300} text="01 — Shaping the future of Auckland's residential landscape." className="text-lg md:text-xl font-light text-zinc-600 max-w-sm mb-8 md:mb-0" />
-          <Interactive onClick={() => navigate('projects')} className="group flex items-center gap-4 cursor-pointer text-zinc-950 md:text-white md:mix-blend-difference">
-            <div className="w-12 h-12 rounded-full border border-current flex items-center justify-center group-hover:bg-white group-hover:text-zinc-950 transition-colors duration-500">
-              <ArrowRight className="w-5 h-5 transition-colors duration-500" />
-            </div>
-            <span className="uppercase tracking-[0.2em] text-sm font-semibold">Explore Portfolio</span>
-          </Interactive>
+          <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-8 border-t border-white/20 pt-8">
+             <RevealText text="Over 600 premium homes delivered with uncompromising architectural integrity. Built on trust, driven by design." className="text-lg md:text-xl font-light text-zinc-300 max-w-xl" delay={200} />
+             <Interactive onClick={() => navigate('projects')} className="group flex items-center gap-4 cursor-pointer text-white">
+                <div className="w-14 h-14 rounded-full border border-white/30 backdrop-blur-sm flex items-center justify-center group-hover:bg-white group-hover:text-zinc-950 transition-colors duration-500">
+                  <ArrowRight className="w-6 h-6 transition-colors duration-500" />
+                </div>
+                <span className="uppercase tracking-[0.2em] text-sm font-semibold">Explore Portfolio</span>
+              </Interactive>
+          </div>
         </div>
       </section>
 
@@ -661,11 +637,17 @@ const HomePage = ({ navigate }) => {
 
       {/* FAQ Accordion Section */}
       <Section className="bg-white">
-        <div className="max-w-4xl">
+        <div className="w-[90%] mx-auto">
           <RevealText text="FREQUENTLY ASKED" className="text-xs tracking-[0.3em] uppercase text-zinc-400 font-semibold mb-16" />
           <div className="border-t border-zinc-200">
             {faqData.map((faq, idx) => (
-              <Accordion key={idx} question={faq.q} answer={faq.a} />
+              <Accordion 
+                key={idx} 
+                question={faq.q} 
+                answer={faq.a} 
+                isOpen={openFaqIndex === idx}
+                onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
+              />
             ))}
           </div>
         </div>
@@ -1318,7 +1300,7 @@ export default function App() {
                 <img 
                   src="https://static.wixstatic.com/media/548938_1509800225e542a4a2d4144aa68163e9~mv2.png" 
                   alt="Pillar Properties" 
-                  className={`w-auto cursor-pointer object-contain transition-all duration-700 ${scrolled ? 'h-6 md:h-7' : 'h-7 md:h-9'}`}
+                  className={`w-auto cursor-pointer object-contain transition-all duration-700 ${scrolled ? 'h-6 md:h-7' : 'h-7 md:h-9'} ${!scrolled && currentPage === 'home' ? 'brightness-0 invert' : ''}`}
                 />
               </Interactive>
             </div>
