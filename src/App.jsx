@@ -1,4 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+
+// --- Theme / Version Context ---
+const VersionContext = createContext('v1');
+
+const useVersion = () => {
+  const v = useContext(VersionContext);
+  const isV2 = v === 'v2';
+  return {
+    isV2,
+    bg: isV2 ? 'bg-[#e8d5b5]' : 'bg-[#fdf6e4]',
+    bg90: isV2 ? 'bg-[#e8d5b5]/90' : 'bg-[#fdf6e4]/90',
+    bg80: isV2 ? 'bg-[#e8d5b5]/80' : 'bg-[#fdf6e4]/80',
+    text: isV2 ? 'text-[#e8d5b5]' : 'text-[#fdf6e4]',
+    from: isV2 ? 'from-[#e8d5b5]/90' : 'from-[#fdf6e4]/90',
+    via: isV2 ? 'via-[#e8d5b5]/60' : 'via-[#fdf6e4]/60',
+    to: isV2 ? 'to-[#e8d5b5]/95' : 'to-[#fdf6e4]/95',
+    border: isV2 ? 'border-[#e8d5b5]' : 'border-[#fdf6e4]',
+    hex: isV2 ? '#e8d5b5' : '#fdf6e4'
+  };
+};
 
 // --- Reusable Scroll Reveal Component ---
 const Reveal = ({ children, delay = 0, active = true, className = "", threshold = 0.1 }) => {
@@ -197,6 +217,7 @@ const LeafletMap = () => {
 
 // --- Advanced Real-time Area Chart (Frequency) ---
 const LiveFrequencyChart = () => {
+  const t = useVersion();
   const [hoverX, setHoverX] = useState(null);
   
   // Initial state representing trailing 10 periods
@@ -267,7 +288,7 @@ const LiveFrequencyChart = () => {
           return (
             <g key={i} className="cursor-crosshair" onMouseEnter={() => setHoverX(i)}>
               {hoverX === i && <line x1={p.x} y1={padding} x2={p.x} y2={height-padding} stroke="#7e848e" strokeWidth="1" strokeDasharray="4 4" />}
-              <circle cx={p.x} cy={p.y} r={hoverX === i ? 6 : 3} fill="#fdf6e4" stroke={color} strokeWidth="2.5" className="transition-all duration-300" />
+              <circle cx={p.x} cy={p.y} r={hoverX === i ? 6 : 3} fill={t.hex} stroke={color} strokeWidth="2.5" className="transition-all duration-300" />
             </g>
           );
         })}
@@ -341,7 +362,7 @@ const LiveGenerationChart = () => {
 
   return (
     <div className="w-full h-full flex flex-col relative pt-4">
-      {/* Live Data HUD - Moved out of the chart and organized cleanly */}
+      {/* Live Data HUD */}
       <div className="flex items-center gap-6 md:gap-8 mb-6 px-2">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-bold text-[#7e848e] flex items-center gap-1.5 uppercase tracking-wider"><div className="w-2 h-2 rounded-sm bg-[#7c9074]"></div>Hydro</span>
@@ -394,6 +415,7 @@ const LiveGenerationChart = () => {
 
 // --- Experts Carousel Component ---
 const ExpertsCarousel = () => {
+  const t = useVersion();
   const experts = [
     { name: "Dr. Abhijit R. Abhyankar", title: "Dean of Infrastructure", org: "IIT Delhi", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80", details: "Specializing in Power System Restructuring, Smart Grids, and developing robust Regulatory Policy frameworks." },
     { name: "Prof. Ashu Verma", title: "Professor, Dept. of Energy", org: "IIT Delhi", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80", details: "Leading research on Renewable Energy Integration, Microgrid operational planning, and distribution systems." },
@@ -443,7 +465,7 @@ const ExpertsCarousel = () => {
                   <div className="flex flex-col items-start gap-2 mb-4">
                     <span className="px-3 py-1.5 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[9px] font-bold uppercase tracking-widest rounded-lg shadow-sm">{expert.org}</span>
                     <h4 className="text-xl md:text-2xl font-semibold text-white leading-tight mt-2">{expert.name}</h4>
-                    <p className="text-xs md:text-sm font-medium text-[#fdf6e4]">{expert.title}</p>
+                    <p className={`text-xs md:text-sm font-medium ${t.text}`}>{expert.title}</p>
                   </div>
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden">
                     <p className="text-xs md:text-sm text-white/80 leading-relaxed border-t border-white/20 pt-4 mt-2">{expert.details}</p>
@@ -466,6 +488,7 @@ const ExpertsCarousel = () => {
 
 // --- Preloader Component ---
 const Preloader = ({ onComplete }) => {
+  const t = useVersion();
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("Initializing Grid Operations...");
 
@@ -503,7 +526,7 @@ const Preloader = ({ onComplete }) => {
   }, []);
 
   return (
-    <div className="absolute inset-0 bg-[#fdf6e4] flex flex-col items-center justify-center z-[9999] overflow-hidden">
+    <div className={`absolute inset-0 ${t.bg} flex flex-col items-center justify-center z-[9999] overflow-hidden`}>
       <div className="absolute inset-0 bg-draft-grid opacity-70"></div>
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="bg-[#f0f2f5] border border-white/60 p-8 rounded-[1.25rem] shadow-[0_20px_60px_rgba(126,132,142,0.15)] flex flex-col">
@@ -513,13 +536,13 @@ const Preloader = ({ onComplete }) => {
                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3376c6" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
               </div>
            </div>
-           <div className="w-full h-3 bg-[#fdf6e4] rounded-full overflow-hidden mb-6 shadow-inner">
+           <div className={`w-full h-3 ${t.bg} rounded-full overflow-hidden mb-6 shadow-inner`}>
               <div className="h-full bg-[#3376c6] transition-all duration-75 ease-out rounded-full" style={{ width: `${progress}%` }}></div>
            </div>
            <p className="text-lg md:text-xl font-semibold text-[#7e848e] tracking-tight">{status}</p>
         </div>
         <div className="absolute bottom-[-80px] left-0 right-0 flex justify-center items-center gap-3 opacity-60">
-           <div className="w-6 h-6 bg-[#3376c6] rounded flex items-center justify-center"><span className="text-[#fdf6e4] font-bold text-[9px]">IIT</span></div>
+           <div className="w-6 h-6 bg-[#3376c6] rounded flex items-center justify-center"><span className={`${t.text} font-bold text-[9px]`}>IIT</span></div>
            <span className="text-xs font-bold text-[#7e848e] tracking-widest uppercase">Centre of Excellence RA</span>
         </div>
       </div>
@@ -529,6 +552,8 @@ const Preloader = ({ onComplete }) => {
 
 // --- Hero Showcase Component ---
 const HeroShowcase = () => {
+  const t = useVersion();
+  const { isV2 } = t;
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
@@ -538,6 +563,9 @@ const HeroShowcase = () => {
     const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
     setMousePos({ x, y });
   };
+
+  // Enhance the scale factor significantly for V2
+  const scaleFactor = isV2 ? 1.15 : 1;
 
   return (
     <div 
@@ -557,8 +585,34 @@ const HeroShowcase = () => {
 
       <div 
         className="relative w-full max-w-[500px] lg:max-w-full aspect-square md:aspect-[4/3] flex items-center justify-center z-10 transition-transform duration-[800ms] ease-out"
-        style={{ transform: `translate(${mousePos.x * 12}px, ${mousePos.y * 12}px)` }}
+        style={{ transform: `scale(${scaleFactor}) translate(${mousePos.x * 12}px, ${mousePos.y * 12}px)` }}
       >
+        {/* Fill empty space with V2 Specific Enhancements */}
+        {isV2 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.35]">
+             <div className="absolute w-[80%] lg:w-[90%] aspect-square rounded-full border border-[#3376c6]/40 border-dashed animate-[spin_50s_linear_infinite]"></div>
+             <div className="absolute w-[60%] lg:w-[65%] aspect-square rounded-full border border-[#7c9074]/40 border-dashed animate-[spin_35s_linear_infinite_reverse]"></div>
+             <div className="absolute w-[40%] lg:w-[45%] aspect-square rounded-full border border-[#7e848e]/30 border-dotted animate-[spin_20s_linear_infinite]"></div>
+          </div>
+        )}
+
+        {isV2 && (
+          <>
+            <div className="absolute top-[18%] right-[8%] lg:right-[15%] animate-float delay-100 z-10 pointer-events-auto">
+              <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#7e848e]/20 text-[9px] font-bold text-[#3376c6] shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-1.5 hover:scale-110 transition-transform cursor-pointer">
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#3376c6] animate-pulse"></div>
+                 Market Coupling Pilot
+              </div>
+            </div>
+            <div className="absolute bottom-[22%] left-[5%] lg:left-[12%] animate-float delay-300 z-10 pointer-events-auto">
+              <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#7e848e]/20 text-[9px] font-bold text-[#7c9074] shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-1.5 hover:scale-110 transition-transform cursor-pointer">
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#7c9074] animate-pulse"></div>
+                 RE Integration: 42%
+              </div>
+            </div>
+          </>
+        )}
+
         <svg className="absolute inset-0 w-full h-full z-0 opacity-40 pointer-events-none" style={{ filter: 'drop-shadow(0 0 2px rgba(51,118,198,0.4))' }}>
           <path d="M 55% 60% C 40% 60%, 20% 30%, 10% 25%" fill="none" stroke="#3376c6" strokeWidth="1.5" strokeDasharray="4 8" className="animate-data-flow" />
           <path d="M 60% 50% C 75% 50%, 85% 25%, 90% 20%" fill="none" stroke="#7c9074" strokeWidth="1.5" strokeDasharray="4 8" className="animate-data-flow" style={{ animationDirection: 'reverse' }} />
@@ -677,7 +731,9 @@ const MenuIcon = ({ type }) => {
   }
 };
 
-export default function App() {
+// --- App Content Component ---
+const AppContent = () => {
+  const t = useVersion();
   const [isLoading, setIsLoading] = useState(true);
   const [showPreloader, setShowPreloader] = useState(true);
   const [appLoaded, setAppLoaded] = useState(false);
@@ -749,7 +805,12 @@ export default function App() {
         p { font-family: var(--font-mono) !important; font-size: 0.875rem; line-height: 1.6; }
 
         .bg-dot-pattern { background-image: radial-gradient(#7e848e22 1px, transparent 1px); background-size: 24px 24px; }
+        
+        /* V1 Draft Grid */
         .bg-draft-grid { background-image: linear-gradient(to right, rgba(126, 132, 142, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(126, 132, 142, 0.08) 1px, transparent 1px); background-size: 40px 40px; }
+        
+        /* V2 Draft Grid (More Visible) */
+        .bg-draft-grid-v2 { background-image: linear-gradient(to right, rgba(126, 132, 142, 0.25) 1px, transparent 1px), linear-gradient(to bottom, rgba(126, 132, 142, 0.25) 1px, transparent 1px); background-size: 40px 40px; }
 
         @keyframes grid-pan { from { background-position: 0 0; } to { background-position: -40px -40px; } }
         @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
@@ -778,13 +839,13 @@ export default function App() {
         </div>
       )}
 
-      <div className={`min-h-screen bg-[#fdf6e4] bg-dot-pattern selection:bg-[#3376c6]/20 text-[#7e848e] relative overflow-x-hidden transition-all duration-[1.2s] ease-[cubic-bezier(0.76,0,0.24,1)] ${isLoading ? 'scale-[0.98] opacity-0 h-screen overflow-hidden' : 'scale-100 opacity-100'}`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#fdf6e4]/90 via-[#fdf6e4]/60 to-[#fdf6e4]/95 pointer-events-none fixed z-0"></div>
+      <div className={`min-h-screen ${t.bg} bg-dot-pattern selection:bg-[#3376c6]/20 text-[#7e848e] relative overflow-x-hidden transition-all duration-[1.2s] ease-[cubic-bezier(0.76,0,0.24,1)] ${isLoading ? 'scale-[0.98] opacity-0 h-screen overflow-hidden' : 'scale-100 opacity-100'}`}>
+        <div className={`absolute inset-0 bg-gradient-to-b ${t.from} ${t.via} ${t.to} pointer-events-none fixed z-0`}></div>
 
         <div className="relative z-10">
           
           {/* Header */}
-          <header className="fixed top-0 w-full z-[100] bg-[#fdf6e4]/80 transition-all backdrop-blur-xl border-b border-[#7e848e]/10">
+          <header className={`fixed top-0 w-full z-[100] ${t.bg80} transition-all backdrop-blur-xl border-b border-[#7e848e]/10`}>
             <div className="w-full px-[3%] py-3 flex justify-between items-center relative">
               <div className="flex items-center gap-4 cursor-pointer relative z-20">
                 <div className="flex items-center gap-3 group">
@@ -853,7 +914,11 @@ export default function App() {
 
           {/* 1. Hero Section */}
           <section className="relative h-screen pt-24 pb-8 flex flex-col justify-center overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)] z-0"><div className="absolute inset-0 bg-draft-grid animate-[grid-pan_15s_linear_infinite]"></div></div>
+            {/* Dynamic Pattern V1 vs V2 */}
+            <div className={`absolute inset-0 pointer-events-none mix-blend-multiply [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)] z-0 ${t.isV2 ? 'opacity-80' : 'opacity-40'}`}>
+               <div className={`absolute inset-0 animate-[grid-pan_15s_linear_infinite] ${t.isV2 ? 'bg-draft-grid-v2' : 'bg-draft-grid'}`}></div>
+            </div>
+            
             <div className="absolute top-1/4 -left-64 w-[600px] h-[600px] bg-[#3376c6] opacity-[0.03] rounded-full blur-[120px] pointer-events-none"></div>
 
             <div className="w-full px-[3%] flex-grow flex flex-col justify-center relative z-10">
@@ -879,7 +944,7 @@ export default function App() {
                   <Reveal active={appLoaded} delay={300} className="w-full">
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                       <div className="w-full sm:w-auto px-6 py-3 bg-[#3376c6] hover:bg-[#3376c6]/90 text-white rounded-lg transition-all cursor-pointer flex items-center justify-center font-semibold text-sm">Explore Research</div>
-                      <div className="w-full sm:w-auto px-6 py-3 bg-[#fdf6e4] hover:bg-white text-[#3376c6] rounded-lg transition-all cursor-pointer border border-[#7e848e]/20 flex items-center justify-center font-semibold text-sm">Learn More</div>
+                      <div className={`w-full sm:w-auto px-6 py-3 ${t.bg} hover:bg-white text-[#3376c6] rounded-lg transition-all cursor-pointer border border-[#7e848e]/20 flex items-center justify-center font-semibold text-sm`}>Learn More</div>
                     </div>
                   </Reveal>
                   <Reveal active={appLoaded} delay={400} className="w-full mt-10 pt-8 border-t border-[#7e848e]/20 hidden sm:block max-w-xl">
@@ -900,7 +965,7 @@ export default function App() {
           </section>
 
           {/* 2. Trusted Partners Strip */}
-          <section className="bg-[#fdf6e4] py-8 overflow-hidden shadow-none border-0">
+          <section className={`${t.bg} py-8 overflow-hidden shadow-none border-0`}>
             <Reveal active={appLoaded} delay={400} className="w-full">
               <div className="text-center mb-6 px-[3%] max-w-[96rem] mx-auto">
                  <span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Aligned with institutions driving power sector reform</span>
@@ -951,7 +1016,7 @@ export default function App() {
           <section className="py-16 md:py-24 border-y border-[#7e848e]/20 relative bg-white">
             <div className="w-full max-w-[96rem] mx-auto px-[3%] relative z-10">
               <div className="grid lg:grid-cols-2 gap-12 items-center">
-                <Reveal className="relative w-full p-2 bg-[#fdf6e4] rounded-[2rem] border border-[#7e848e]/10 shadow-sm group">
+                <Reveal className={`relative w-full p-2 ${t.bg} rounded-[2rem] border border-[#7e848e]/10 shadow-sm group`}>
                   <div className="relative w-full h-[400px] md:h-[500px] rounded-[1.5rem] overflow-hidden">
                     <img 
                       src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=2070" 
@@ -990,7 +1055,7 @@ export default function App() {
           </section>
 
           {/* 5. Our Experts & Leadership - Carousel */}
-          <section className="py-16 md:py-24 bg-[#fdf6e4]">
+          <section className={`py-16 md:py-24 ${t.bg}`}>
             <div className="w-full max-w-[96rem] mx-auto px-[3%]">
               <Reveal className="mb-2 flex flex-col items-start gap-2 w-full">
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Where academic rigour meets real-world expertise</span>
@@ -1003,7 +1068,7 @@ export default function App() {
           </section>
 
           {/* 6. Metrics / Impact */}
-          <section className="py-16 md:py-24  bg-[#fdf6e4] shadow-sm">
+          <section className={`py-16 md:py-24 ${t.bg} shadow-sm`}>
             <div className="w-full max-w-[96rem] mx-auto px-[3%]">
               <Reveal className="max-w-3xl mb-12">
                 <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">From regulatory insight to system impact</h2>
@@ -1021,7 +1086,7 @@ export default function App() {
                 ].map((item, i) => (
                   <Reveal key={i} delay={i * 150} className="w-full">
                     <div className="group p-8 bg-white border border-[#7e848e]/10 rounded-[2rem] shadow-sm hover:shadow-[0_20px_50px_rgba(51,118,198,0.08)] transition-all duration-500 hover:-translate-y-2 flex flex-col items-center text-center h-full">
-                       <div className="w-14 h-14 bg-[#fdf6e4] border border-[#7e848e]/10 text-2xl flex items-center justify-center rounded-2xl mb-6 shadow-sm group-hover:scale-110 transition-transform">{item.icon}</div>
+                       <div className={`w-14 h-14 ${t.bg} border border-[#7e848e]/10 text-2xl flex items-center justify-center rounded-2xl mb-6 shadow-sm group-hover:scale-110 transition-transform`}>{item.icon}</div>
                        <div className="text-5xl md:text-6xl font-bold text-[#3376c6] mb-3 tracking-tighter">
                          <AnimatedCounter target={item.metric} />{item.suffix}
                        </div>
@@ -1045,14 +1110,14 @@ export default function App() {
                 <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 tracking-tight">Real-Time Regional Impact Map</h2>
                 <p className="text-[#7e848e] max-w-2xl">Live visualisation of grid capacities and active regulatory nodes managed via the CoE framework.</p>
               </Reveal>
-              <Reveal delay={200} className="w-full h-[500px] md:h-[600px] relative rounded-[2rem] p-3 bg-[#fdf6e4] border border-[#7e848e]/10 shadow-sm">
+              <Reveal delay={200} className={`w-full h-[500px] md:h-[600px] relative rounded-[2rem] p-3 ${t.bg} border border-[#7e848e]/10 shadow-sm`}>
                  <LeafletMap />
               </Reveal>
             </div>
           </section>
 
           {/* 8. Featured Data & Analytics Preview (Live SVG Charts) */}
-          <section className="py-16 md:py-24 w-full bg-[#fdf6e4]">
+          <section className={`py-16 md:py-24 w-full ${t.bg}`}>
             <div className="w-full max-w-[96rem] mx-auto px-[3%]">
               <Reveal className="mb-12 flex flex-col items-start gap-2">
                 <span className="text-[10px] font-semibold uppercase tracking-widest text-[#7c9074]">Analytical depth, shaping decisions</span>
@@ -1146,7 +1211,7 @@ export default function App() {
           </section>
 
           {/* 10. Knowledge Hub */}
-          <section className="py-16 md:py-24 bg-[#fdf6e4]">
+          <section className={`py-16 md:py-24 ${t.bg}`}>
             <div className="w-full max-w-[96rem] mx-auto px-[3%]">
               <Reveal className="mb-12 text-center max-w-3xl mx-auto flex flex-col items-center">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#7c9074] bg-[#7c9074]/10 px-4 py-1.5 rounded-full mb-4">Knowledge Hub</span>
@@ -1173,7 +1238,7 @@ export default function App() {
                   <div className="w-full bg-white rounded-[2rem] border border-[#7e848e]/10 p-8 shadow-sm h-full flex flex-col">
                     <div className="flex justify-between items-center mb-8 border-b border-[#7e848e]/10 pb-6">
                       <h3 className="text-xl font-bold text-gray-900">Recent Publications</h3>
-                      <div className="flex items-center gap-2 px-4 py-2 bg-[#fdf6e4] rounded-lg text-xs font-bold text-[#7e848e] cursor-pointer hover:text-black transition-colors">
+                      <div className={`flex items-center gap-2 px-4 py-2 ${t.bg} rounded-lg text-xs font-bold text-[#7e848e] cursor-pointer hover:text-black transition-colors`}>
                         View Archive <span>→</span>
                       </div>
                     </div>
@@ -1185,7 +1250,7 @@ export default function App() {
                         { title: "Real-time Frequency Variance Analysis Dataset", type: "Dataset", date: "Feb 2026", size: "14 MB" },
                         { title: "Consultation Paper on Ancillary Services Deployment", type: "Framework", date: "Jan 2026", size: "3.1 MB" },
                       ].map((doc, idx) => (
-                        <div key={idx} className="group flex items-center justify-between p-5 rounded-2xl hover:bg-[#fdf6e4] border border-transparent hover:border-[#7e848e]/20 transition-all duration-300 cursor-pointer">
+                        <div key={idx} className={`group flex items-center justify-between p-5 rounded-2xl hover:${t.bg} border border-transparent hover:border-[#7e848e]/20 transition-all duration-300 cursor-pointer`}>
                           <div className="flex items-center gap-5">
                             <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-[#3376c6] group-hover:shadow-sm transition-all">📄</div>
                             <div className="flex flex-col gap-1">
@@ -1224,7 +1289,7 @@ export default function App() {
                   { d: "05", m: "JUL", title: "Decoding Tariff Regulations", img: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&w=800&q=80", type: "Webinar" }
                 ].map((event, idx) => (
                   <Reveal key={idx} delay={idx * 150} className="w-full">
-                    <div className="group rounded-[2rem] bg-[#fdf6e4] border border-[#7e848e]/10 overflow-hidden cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-[450px]">
+                    <div className={`group rounded-[2rem] ${t.bg} border border-[#7e848e]/10 overflow-hidden cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-[450px]`}>
                       <div className="h-[200px] w-full relative overflow-hidden">
                         <img src={event.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="event" />
                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur rounded-xl p-3 text-center min-w-[70px] shadow-lg border border-white/50">
@@ -1265,7 +1330,7 @@ export default function App() {
                   </div>
                   
                   <div className="relative z-10 flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                    <div className="px-8 py-5 bg-white text-black hover:bg-[#fdf6e4] hover:scale-105 font-bold text-sm rounded-lg shadow-xl transition-all duration-300 cursor-pointer text-center">
+                    <div className={`px-8 py-5 bg-white text-black hover:${t.bg} hover:scale-105 font-bold text-sm rounded-lg shadow-xl transition-all duration-300 cursor-pointer text-center`}>
                       Join Our Mailing List
                     </div>
                     <div className="px-8 py-5 bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 font-bold text-sm rounded-lg transition-all duration-300 cursor-pointer text-center">
@@ -1359,5 +1424,32 @@ export default function App() {
         </div>
       </div>
     </>
+  );
+};
+
+export default function App() {
+  const [version, setVersion] = useState('v1');
+  
+  return (
+    <VersionContext.Provider value={version}>
+      {/* V1 / V2 Theme Switcher (Pill at Bottom Right) */}
+      <div className="fixed bottom-6 right-6 lg:right-12 z-[10000] bg-white p-1.5 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.15)] border border-gray-200 flex font-sans">
+        <button 
+          onClick={() => setVersion('v1')}
+          className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 ${version === 'v1' ? 'bg-gray-900 text-white shadow-md' : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`}
+        >
+          V1
+        </button>
+        <button 
+          onClick={() => setVersion('v2')}
+          className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 ${version === 'v2' ? 'bg-gray-900 text-white shadow-md' : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900'}`}
+        >
+          V2
+        </button>
+      </div>
+
+      {/* Main Application Content */}
+      <AppContent />
+    </VersionContext.Provider>
   );
 }
