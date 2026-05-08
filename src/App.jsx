@@ -8,15 +8,15 @@ const useVersion = () => {
   const isV2 = v === 'v2';
   return {
     isV2,
-    bg: isV2 ? 'bg-[#e8d5b5]' : 'bg-[#fdf6e4]',
-    bg90: isV2 ? 'bg-[#e8d5b5]/90' : 'bg-[#fdf6e4]/90',
-    bg80: isV2 ? 'bg-[#e8d5b5]/80' : 'bg-[#fdf6e4]/80',
-    text: isV2 ? 'text-[#e8d5b5]' : 'text-[#fdf6e4]',
-    from: isV2 ? 'from-[#e8d5b5]/90' : 'from-[#fdf6e4]/90',
-    via: isV2 ? 'via-[#e8d5b5]/60' : 'via-[#fdf6e4]/60',
-    to: isV2 ? 'to-[#e8d5b5]/95' : 'to-[#fdf6e4]/95',
-    border: isV2 ? 'border-[#e8d5b5]' : 'border-[#fdf6e4]',
-    hex: isV2 ? '#e8d5b5' : '#fdf6e4'
+    bg: isV2 ? 'bg-[#fdf6e4]' : 'bg-[#fdf6e4]',
+    bg90: isV2 ? 'bg-[#fdf6e4]/90' : 'bg-[#fdf6e4]/90',
+    bg80: isV2 ? 'bg-[#fdf6e4]/80' : 'bg-[#fdf6e4]/80',
+    text: isV2 ? 'text-[#fdf6e4]' : 'text-[#fdf6e4]',
+    from: isV2 ? 'from-[#fdf6e4]/90' : 'from-[#fdf6e4]/90',
+    via: isV2 ? 'via-[#fdf6e4]/60' : 'via-[#fdf6e4]/60',
+    to: isV2 ? 'to-[#fdf6e4]/95' : 'to-[#fdf6e4]/95',
+    border: isV2 ? 'border-[#fdf6e4]' : 'border-[#fdf6e4]',
+    hex: isV2 ? '#fdf6e4' : '#fdf6e4'
   };
 };
 
@@ -63,7 +63,6 @@ const AnimatedCounter = ({ target, duration = 2000 }) => {
         const step = (timestamp) => {
           if (!start) start = timestamp;
           const progress = Math.min((timestamp - start) / duration, 1);
-          // Ease out quart equation for smooth deceleration
           const easeProgress = 1 - Math.pow(1 - progress, 4);
           setCount(Math.floor(easeProgress * target));
           if (progress < 1) {
@@ -107,7 +106,6 @@ const LeafletMap = () => {
   const mapInstance = useRef(null);
   const markersRef = useRef({});
 
-  // Simulated live API state
   const [liveGrids, setLiveGrids] = useState([
     { id: 'nr', name: "Northern Grid", lat: 28.6139, lng: 77.2090, baseCap: 64.2, capacity: 64.2, limit: 70, trend: "+1.2%" },
     { id: 'wr', name: "Western Grid", lat: 19.0760, lng: 72.8777, baseCap: 58.8, capacity: 58.8, limit: 65, trend: "+0.8%" },
@@ -116,19 +114,18 @@ const LeafletMap = () => {
     { id: 'ner', name: "NE Grid", lat: 26.1445, lng: 91.7362, baseCap: 3.2, capacity: 3.2, limit: 5, trend: "+0.2%" },
   ]);
 
-  // Initial Map Setup
   useEffect(() => {
     if (isLoaded && mapRef.current && !mapInstance.current) {
       const L = window.L;
       const map = L.map(mapRef.current, { scrollWheelZoom: false }).setView([22.5937, 78.9629], 4.5);
       
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
       liveGrids.forEach(grid => {
         const marker = L.circleMarker([grid.lat, grid.lng], {
-          color: '#3376c6', fillColor: '#3376c6', fillOpacity: 0.4, radius: 10, weight: 3
+          color: '#f5a623', fillColor: '#f5a623', fillOpacity: 0.4, radius: 10, weight: 3
         }).addTo(map);
         
         markersRef.current[grid.id] = marker;
@@ -144,29 +141,26 @@ const LeafletMap = () => {
     };
   }, [isLoaded]);
 
-  // Real-time API Polling Simulation
   useEffect(() => {
     const interval = setInterval(() => {
       setLiveGrids(prev => prev.map(g => {
-        const fluctuation = (Math.random() - 0.5) * 1.5; // +/- 0.75 GW
+        const fluctuation = (Math.random() - 0.5) * 1.5; 
         return { ...g, capacity: Math.max(g.baseCap * 0.8, Math.min(g.baseCap * 1.2, g.capacity + fluctuation)) };
       }));
-    }, 2500); // Poll every 2.5 seconds
+    }, 2500); 
     return () => clearInterval(interval);
   }, []);
 
-  // Update Markers when Data Changes
   useEffect(() => {
     if (!mapInstance.current) return;
     
     liveGrids.forEach(grid => {
       const marker = markersRef.current[grid.id];
       if (marker) {
-        // Change color based on load severity
         const loadRatio = grid.capacity / grid.limit;
-        let color = '#3376c6'; // Normal
-        if (loadRatio > 0.85) color = '#f5a623'; // Warning
-        if (loadRatio > 0.95) color = '#ef4444'; // Critical
+        let color = '#3376c6'; 
+        if (loadRatio > 0.85) color = '#f5a623'; 
+        if (loadRatio > 0.95) color = '#ef4444'; 
         
         marker.setStyle({ color, fillColor: color });
 
@@ -183,7 +177,6 @@ const LeafletMap = () => {
           </div>
         `;
         
-        // Update popup content cleanly
         if (marker.getPopup()) {
           marker.setPopupContent(popupContent);
         } else {
@@ -196,10 +189,9 @@ const LeafletMap = () => {
   if (!isLoaded) return <div className="w-full h-full flex flex-col items-center justify-center bg-white/50 animate-pulse rounded-2xl"><div className="w-8 h-8 border-4 border-[#3376c6] border-t-transparent rounded-full animate-spin"></div><span className="mt-4 text-xs font-semibold text-[#7e848e]">Connecting to Real-time Grid Services...</span></div>;
   
   return (
-    <div className="w-full h-full rounded-2xl overflow-hidden shadow-inner border border-[#7e848e]/20 relative z-0 bg-[#e5e7eb]">
+    <div className="w-full h-full rounded-[15px] overflow-hidden shadow-inner border border-[#7e848e]/20 relative z-0 bg-[#e5e7eb]">
       <div ref={mapRef} className="w-full h-full z-0 leaflet-container-custom"></div>
       
-      {/* HUD Overlay */}
       <div className="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur-md border border-white/40 p-3 rounded-xl shadow-lg pointer-events-none">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -219,30 +211,26 @@ const LeafletMap = () => {
 const LiveFrequencyChart = () => {
   const t = useVersion();
   const [hoverX, setHoverX] = useState(null);
-  
-  // Initial state representing trailing 10 periods
   const [data, setData] = useState([49.95, 49.98, 50.02, 49.99, 49.91, 49.96, 50.04, 50.01, 49.97, 50.00]);
   
-  // Real-time API Polling Simulation
   useEffect(() => {
     const interval = setInterval(() => {
       setData(prev => {
         const newArr = [...prev.slice(1)];
         const lastVal = newArr[newArr.length - 1];
-        // Target 50.0Hz with realistic grid fluctuations
         const variance = (Math.random() - 0.5) * 0.08;
         const pullToCenter = (50.0 - lastVal) * 0.1;
         const nextVal = Number((lastVal + variance + pullToCenter).toFixed(3));
-        newArr.push(Math.max(49.5, Math.min(50.5, nextVal))); // Hard limits
+        newArr.push(Math.max(49.5, Math.min(50.5, nextVal)));
         return newArr;
       });
-    }, 2000); // Poll every 2 seconds
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
   const width = 800; const height = 300;
   const padding = 20;
-  const minData = 49.8; // Chart Y-axis bounds
+  const minData = 49.8; 
   const maxData = 50.2;
   const range = maxData - minData;
   
@@ -261,8 +249,6 @@ const LiveFrequencyChart = () => {
     path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${points[i].x},${points[i].y}`;
   }
   const areaPath = `${path} L ${points[points.length-1].x},${height-padding} L ${points[0].x},${height-padding} Z`;
-
-  // Draw 50Hz reference line
   const refY = height - padding - (((50.0 - minData) / range) * (height - padding * 2));
 
   return (
@@ -275,7 +261,6 @@ const LiveFrequencyChart = () => {
           </linearGradient>
         </defs>
         
-        {/* 50Hz Target Line */}
         <line x1={padding} y1={refY} x2={width-padding} y2={refY} stroke="#7c9074" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
         <text x={width - padding + 5} y={refY + 3} fill="#7c9074" fontSize="10" fontWeight="bold">50.0 Hz</text>
 
@@ -294,7 +279,7 @@ const LiveFrequencyChart = () => {
         })}
       </svg>
       {hoverX !== null && (
-        <div className="absolute bg-white/95 backdrop-blur-md border border-[#7e848e]/20 p-3 rounded-xl shadow-xl pointer-events-none transform -translate-x-1/2 -translate-y-full transition-all duration-200 z-10 w-max" style={{ left: `${(hoverX / (data.length - 1)) * 100}%`, top: `${(1 - ((points[hoverX].val - minData)/range)) * 100}%`, marginTop: '-15px' }}>
+        <div className="absolute bg-white/95 backdrop-blur-md border border-[#7e848e]/20 p-3 rounded-[15px] shadow-xl pointer-events-none transform -translate-x-1/2 -translate-y-full transition-all duration-200 z-10 w-max" style={{ left: `${(hoverX / (data.length - 1)) * 100}%`, top: `${(1 - ((points[hoverX].val - minData)/range)) * 100}%`, marginTop: '-15px' }}>
           <div className="text-[10px] uppercase font-bold text-[#7e848e] mb-1">Trailing T-{data.length - hoverX - 1}</div>
           <div className="text-gray-900 font-bold">{points[hoverX].val.toFixed(3)} Hz</div>
         </div>
@@ -305,7 +290,6 @@ const LiveFrequencyChart = () => {
 
 // --- Advanced Multi-Series Bar Chart (Live Rolling Mix) ---
 const LiveGenerationChart = () => {
-  // 40 points for a smooth continuous scrolling effect
   const [data, setData] = useState(() => {
     return Array.from({length: 40}, (_, i) => ({
       solar: 35 + Math.sin(i*0.2)*3 + (Math.random() * 0.5),
@@ -314,7 +298,6 @@ const LiveGenerationChart = () => {
     }));
   });
 
-  // Fast 1-second polling to simulate a live telemetry stream
   useEffect(() => {
     const interval = setInterval(() => {
       setData(prev => {
@@ -332,9 +315,8 @@ const LiveGenerationChart = () => {
   }, []);
 
   const width = 800; const height = 220; const padding = 10;
-  const maxScale = 70; // 0 to 70 GW scale per source
+  const maxScale = 70; 
 
-  // Calculate smooth curves for the data streams
   const getBezierPath = (key) => {
     if (data.length === 0) return { path: "", areaPath: "", endY: 0 };
     const points = data.map((d, i) => ({
@@ -362,7 +344,6 @@ const LiveGenerationChart = () => {
 
   return (
     <div className="w-full h-full flex flex-col relative pt-4">
-      {/* Live Data HUD */}
       <div className="flex items-center gap-6 md:gap-8 mb-6 px-2">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-bold text-[#7e848e] flex items-center gap-1.5 uppercase tracking-wider"><div className="w-2 h-2 rounded-sm bg-[#7c9074]"></div>Hydro</span>
@@ -388,22 +369,18 @@ const LiveGenerationChart = () => {
             <linearGradient id="windGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#3376c6" stopOpacity="0.4" /><stop offset="100%" stopColor="#3376c6" stopOpacity="0" /></linearGradient>
           </defs>
 
-          {/* Background Grid Lines for SCADA feel */}
           {[0.25, 0.5, 0.75].map(ratio => (
             <line key={ratio} x1={padding} y1={height - padding - (height-padding*2)*ratio} x2={width-padding} y2={height - padding - (height-padding*2)*ratio} stroke="#7e848e" strokeWidth="1" strokeDasharray="2 6" opacity="0.2" />
           ))}
 
-          {/* Data Streams (Areas) */}
           <path d={hydroData.areaPath} fill="url(#hydroGrad)" className="transition-all duration-1000 ease-linear mix-blend-multiply" />
           <path d={solarData.areaPath} fill="url(#solarGrad)" className="transition-all duration-1000 ease-linear mix-blend-multiply" />
           <path d={windData.areaPath} fill="url(#windGrad)" className="transition-all duration-1000 ease-linear mix-blend-multiply" />
 
-          {/* Data Streams (Lines) */}
           <path d={hydroData.path} fill="none" stroke="#7c9074" strokeWidth="2.5" className="transition-all duration-1000 ease-linear" />
           <path d={solarData.path} fill="none" stroke="#f5a623" strokeWidth="2.5" className="transition-all duration-1000 ease-linear" />
           <path d={windData.path} fill="none" stroke="#3376c6" strokeWidth="2.5" className="transition-all duration-1000 ease-linear" />
           
-          {/* Pulsing Live Dots at the lead of the line */}
           <circle cx={endX} cy={hydroData.endY} r="4" fill="#7c9074" className="transition-all duration-1000 ease-linear shadow-[0_0_10px_#7c9074]" />
           <circle cx={endX} cy={solarData.endY} r="4" fill="#f5a623" className="transition-all duration-1000 ease-linear shadow-[0_0_10px_#f5a623]" />
           <circle cx={endX} cy={windData.endY} r="4" fill="#3376c6" className="transition-all duration-1000 ease-linear shadow-[0_0_10px_#3376c6]" />
@@ -456,7 +433,7 @@ const ExpertsCarousel = () => {
       >
         {experts.map((expert, i) => (
           <div key={i} className="flex-shrink-0 px-3 md:px-4" style={{ width: `${100 / itemsPerView}%` }}>
-            <div className="group relative w-full aspect-[4/5] rounded-[1.5rem] overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_30px_60px_rgba(0,0,0,0.15)] transition-all duration-500">
+            <div className="group relative w-full aspect-[4/5] rounded-[15px] overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_30px_60px_rgba(0,0,0,0.15)] transition-all duration-500">
               <img src={expert.image} alt={expert.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-[#111827]/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500"></div>
 
@@ -476,7 +453,6 @@ const ExpertsCarousel = () => {
           </div>
         ))}
       </div>
-      {/* Pagination Dots */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-2">
          {Array.from({length: experts.length - itemsPerView + 1}).map((_, i) => (
             <div key={i} onClick={() => setCurrentIndex(i)} className={`h-2 rounded-full cursor-pointer transition-all duration-500 ${currentIndex === i ? 'bg-[#3376c6] w-8' : 'bg-[#7e848e]/30 w-2 hover:bg-[#7e848e]/60'}`}></div>
@@ -487,7 +463,7 @@ const ExpertsCarousel = () => {
 };
 
 // --- Preloader Component ---
-const Preloader = ({ onComplete }) => {
+const PreloaderComponent = ({ onComplete }) => {
   const t = useVersion();
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("Initializing Grid Operations...");
@@ -527,9 +503,9 @@ const Preloader = ({ onComplete }) => {
 
   return (
     <div className={`absolute inset-0 ${t.bg} flex flex-col items-center justify-center z-[9999] overflow-hidden`}>
-      <div className="absolute inset-0 bg-draft-grid opacity-70"></div>
+      <div className={`absolute inset-0 ${t.isV2 ? 'bg-draft-grid-v2' : 'bg-draft-grid'} opacity-70`}></div>
       <div className="relative z-10 w-full max-w-md px-6">
-        <div className="bg-[#f0f2f5] border border-white/60 p-8 rounded-[1.25rem] shadow-[0_20px_60px_rgba(126,132,142,0.15)] flex flex-col">
+        <div className={`${t.isV2 ? 'bg-white/80 backdrop-blur-md' : 'bg-[#f0f2f5]'} border border-white/60 p-8 rounded-[15px] shadow-[0_20px_60px_rgba(126,132,142,0.15)] flex flex-col`}>
            <div className="flex justify-between items-center mb-8">
               <span className="text-sm font-bold text-[#7e848e] tracking-widest uppercase">System Load Forecast</span>
               <div className="w-8 h-8 rounded-full border-2 border-[#7e848e]/20 flex items-center justify-center bg-white/50 shadow-sm">
@@ -550,12 +526,32 @@ const Preloader = ({ onComplete }) => {
   );
 };
 
-// --- Hero Showcase Component ---
-const HeroShowcase = () => {
-  const t = useVersion();
-  const { isV2 } = t;
+// --- Reusable Multi-Content Interactive Hero Component ---
+const HeroShowcase = ({ variant = 'v1' }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
+
+  // Dynamic Content based on variant
+  const c1Title = variant === 'v1' ? "Grid Monitoring" : "Market Dispatch";
+  const c1L1 = variant === 'v1' ? "Load" : "Volume";
+  const c1V1 = variant === 'v1' ? "75.4" : "14.2";
+  const c1U1 = variant === 'v1' ? "GW" : "TWh";
+  const c1L2 = variant === 'v1' ? "Frequency" : "MCP";
+  const c1V2 = variant === 'v1' ? "49.98" : "₹4.2";
+  const c1U2 = variant === 'v1' ? "Hz" : "/kWh";
+  const c1L3 = variant === 'v1' ? "Reliability" : "Cleared";
+  const c1V3 = variant === 'v1' ? "98.6" : "99.1";
+  const c1U3 = variant === 'v1' ? "%" : "%";
+
+  const c2Title = variant === 'v1' ? "Regulatory Insights" : "Renewables & Storage";
+  const c2Items = variant === 'v1' 
+    ? ['Compliance', 'Performance', 'Transparency', 'Consumer Impact'] 
+    : ['RE Forecasting', 'BESS Dispatch', 'Market Coupling', 'RPO Compliance'];
+
+  const c3Title = variant === 'v1' ? "Evidence-Based Decisions" : "System Adequacy";
+  const c3Items = variant === 'v1'
+    ? ['Data & Analytics', 'Policy Evaluation', 'Stakeholder Impact']
+    : ['Capacity Mechanisms', 'Reserve Margins', 'Investment Signals'];
 
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -563,9 +559,6 @@ const HeroShowcase = () => {
     const y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
     setMousePos({ x, y });
   };
-
-  // Enhance the scale factor significantly for V2
-  const scaleFactor = isV2 ? 1.15 : 1;
 
   return (
     <div 
@@ -585,34 +578,8 @@ const HeroShowcase = () => {
 
       <div 
         className="relative w-full max-w-[500px] lg:max-w-full aspect-square md:aspect-[4/3] flex items-center justify-center z-10 transition-transform duration-[800ms] ease-out"
-        style={{ transform: `scale(${scaleFactor}) translate(${mousePos.x * 12}px, ${mousePos.y * 12}px)` }}
+        style={{ transform: `translate(${mousePos.x * 12}px, ${mousePos.y * 12}px)` }}
       >
-        {/* Fill empty space with V2 Specific Enhancements */}
-        {isV2 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.35]">
-             <div className="absolute w-[80%] lg:w-[90%] aspect-square rounded-full border border-[#3376c6]/40 border-dashed animate-[spin_50s_linear_infinite]"></div>
-             <div className="absolute w-[60%] lg:w-[65%] aspect-square rounded-full border border-[#7c9074]/40 border-dashed animate-[spin_35s_linear_infinite_reverse]"></div>
-             <div className="absolute w-[40%] lg:w-[45%] aspect-square rounded-full border border-[#7e848e]/30 border-dotted animate-[spin_20s_linear_infinite]"></div>
-          </div>
-        )}
-
-        {isV2 && (
-          <>
-            <div className="absolute top-[18%] right-[8%] lg:right-[15%] animate-float delay-100 z-10 pointer-events-auto">
-              <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#7e848e]/20 text-[9px] font-bold text-[#3376c6] shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-1.5 hover:scale-110 transition-transform cursor-pointer">
-                 <div className="w-1.5 h-1.5 rounded-full bg-[#3376c6] animate-pulse"></div>
-                 Market Coupling Pilot
-              </div>
-            </div>
-            <div className="absolute bottom-[22%] left-[5%] lg:left-[12%] animate-float delay-300 z-10 pointer-events-auto">
-              <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#7e848e]/20 text-[9px] font-bold text-[#7c9074] shadow-[0_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-1.5 hover:scale-110 transition-transform cursor-pointer">
-                 <div className="w-1.5 h-1.5 rounded-full bg-[#7c9074] animate-pulse"></div>
-                 RE Integration: 42%
-              </div>
-            </div>
-          </>
-        )}
-
         <svg className="absolute inset-0 w-full h-full z-0 opacity-40 pointer-events-none" style={{ filter: 'drop-shadow(0 0 2px rgba(51,118,198,0.4))' }}>
           <path d="M 55% 60% C 40% 60%, 20% 30%, 10% 25%" fill="none" stroke="#3376c6" strokeWidth="1.5" strokeDasharray="4 8" className="animate-data-flow" />
           <path d="M 60% 50% C 75% 50%, 85% 25%, 90% 20%" fill="none" stroke="#7c9074" strokeWidth="1.5" strokeDasharray="4 8" className="animate-data-flow" style={{ animationDirection: 'reverse' }} />
@@ -631,26 +598,26 @@ const HeroShowcase = () => {
             <div className="bg-white/95 backdrop-blur-md border border-[#7e848e]/10 p-3 lg:p-4 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 w-[190px] lg:w-[220px]">
               <h4 className="text-[8px] font-bold uppercase text-[#3376c6] tracking-widest mb-2 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3376c6] animate-pulse"></span>
-                Grid Monitoring
+                {c1Title}
               </h4>
               <div className="w-full h-10 mb-3 relative flex items-end border-b border-l border-[#7e848e]/20 group-hover/card:border-[#3376c6]/40 transition-colors">
                 <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 180 40" preserveAspectRatio="none">
                   <defs>
-                    <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                    <linearGradient id={`chartGradient1-${variant}`} x1="0" x2="0" y1="0" y2="1">
                       <stop offset="0%" stopColor="#3376c6" stopOpacity="0.3" />
                       <stop offset="100%" stopColor="#3376c6" stopOpacity="0" />
                     </linearGradient>
                   </defs>
-                  <polygon points="0,40 0,25 36,15 72,25 108,10 144,20 180,5 180,40" fill="url(#chartGradient)" className="transition-all duration-1000 origin-bottom" />
+                  <polygon points="0,40 0,25 36,15 72,25 108,10 144,20 180,5 180,40" fill={`url(#chartGradient1-${variant})`} className="transition-all duration-1000 origin-bottom" />
                   <polyline points="0,25 36,15 72,25 108,10 144,20 180,5" fill="none" stroke="#3376c6" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
                   <circle cx="108" cy="10" r="3" fill="white" stroke="#3376c6" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                   <circle cx="180" cy="5" r="3" fill="white" stroke="#3376c6" strokeWidth="2" vectorEffect="non-scaling-stroke" />
                 </svg>
               </div>
               <div className="flex justify-between items-end">
-                <div className="flex flex-col"><span className="text-[7px] text-[#7e848e] uppercase font-semibold tracking-wider">Load</span><span className="text-[#3376c6] font-bold text-xs leading-none mt-1">75.4 <span className="text-[8px]">GW</span></span></div>
-                <div className="flex flex-col"><span className="text-[7px] text-[#7e848e] uppercase font-semibold tracking-wider">Frequency</span><span className="text-[#3376c6] font-bold text-xs leading-none mt-1">49.98 <span className="text-[8px]">Hz</span></span></div>
-                <div className="flex flex-col"><span className="text-[7px] text-[#7e848e] uppercase font-semibold tracking-wider">Reliability</span><span className="text-[#3376c6] font-bold text-xs leading-none mt-1">98.6 <span className="text-[8px]">%</span></span></div>
+                <div className="flex flex-col"><span className="text-[7px] text-[#7e848e] uppercase font-semibold tracking-wider">{c1L1}</span><span className="text-[#3376c6] font-bold text-xs leading-none mt-1">{c1V1} <span className="text-[8px]">{c1U1}</span></span></div>
+                <div className="flex flex-col"><span className="text-[7px] text-[#7e848e] uppercase font-semibold tracking-wider">{c1L2}</span><span className="text-[#3376c6] font-bold text-xs leading-none mt-1">{c1V2} <span className="text-[8px]">{c1U2}</span></span></div>
+                <div className="flex flex-col"><span className="text-[7px] text-[#7e848e] uppercase font-semibold tracking-wider">{c1L3}</span><span className="text-[#3376c6] font-bold text-xs leading-none mt-1">{c1V3} <span className="text-[8px]">{c1U3}</span></span></div>
               </div>
             </div>
           </div>
@@ -659,10 +626,10 @@ const HeroShowcase = () => {
         <div className={`absolute top-[-5%] right-[-5%] lg:right-[-15%] z-20 pointer-events-auto transition-transform duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${isHovered ? 'translate-x-8 -translate-y-6' : 'translate-x-0 translate-y-0'}`}>
           <div className="animate-float-delayed">
             <div className="bg-white/95 backdrop-blur-md border border-[#7e848e]/10 p-3 lg:p-4 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 w-[210px] lg:w-[240px]">
-              <h4 className="text-[8px] font-bold uppercase text-[#3376c6] tracking-widest mb-4">Regulatory Insights</h4>
+              <h4 className="text-[8px] font-bold uppercase text-[#3376c6] tracking-widest mb-4">{c2Title}</h4>
               <div className="flex justify-between items-end gap-4">
                 <div className="flex flex-col gap-2.5 flex-1">
-                  {['Compliance', 'Performance', 'Transparency', 'Consumer Impact'].map((item, idx) => (
+                  {c2Items.map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between w-full">
                       <span className="text-[8px] lg:text-[9px] text-gray-800 font-semibold">{item}</span>
                       <div className="w-3.5 h-3.5 rounded-full bg-[#7c9074]/15 flex items-center justify-center">
@@ -685,32 +652,31 @@ const HeroShowcase = () => {
         <div className={`absolute bottom-[-5%] lg:bottom-[0%] right-[-5%] lg:right-[-10%] z-20 pointer-events-auto transition-transform duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${isHovered ? 'translate-x-8 translate-y-8' : 'translate-x-0 translate-y-0'}`}>
           <div className="animate-float" style={{ animationDelay: '1.5s' }}>
             <div className="bg-white/95 backdrop-blur-md border border-[#7e848e]/10 p-3 lg:p-4 rounded-xl shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 w-[180px] lg:w-[200px] group">
-              <h4 className="text-[8px] font-bold uppercase text-[#3376c6] tracking-widest mb-3">Evidence-Based Decisions</h4>
+              <h4 className="text-[8px] font-bold uppercase text-[#3376c6] tracking-widest mb-3">{c3Title}</h4>
               <div className="flex flex-col gap-2.5">
-                 <div className="flex items-center gap-3">
-                   <div className="w-6 h-6 bg-[#3376c6]/5 rounded-lg flex items-end justify-center gap-[2px] p-1.5 group-hover:bg-[#3376c6]/10 transition-colors">
-                     <div className="w-[2px] h-[60%] bg-[#7e848e] rounded-[1px]"></div>
-                     <div className="w-[2px] h-[100%] bg-[#7c9074] rounded-[1px]"></div>
-                     <div className="w-[2px] h-[80%] bg-[#3376c6] rounded-[1px]"></div>
+                 {c3Items.map((item, idx) => (
+                   <div key={idx} className="flex items-center gap-3">
+                     <div className="w-6 h-6 bg-[#3376c6]/5 rounded-lg flex items-center justify-center group-hover:bg-[#3376c6]/10 transition-colors">
+                        {idx === 0 ? (
+                           <div className="w-full h-full flex items-end justify-center gap-[2px] p-1.5">
+                             <div className="w-[2px] h-[60%] bg-[#7e848e] rounded-[1px]"></div>
+                             <div className="w-[2px] h-[100%] bg-[#7c9074] rounded-[1px]"></div>
+                             <div className="w-[2px] h-[80%] bg-[#3376c6] rounded-[1px]"></div>
+                           </div>
+                        ) : idx === 1 ? (
+                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7e848e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13" stroke="#3376c6"></line><line x1="16" y1="17" x2="8" y2="17" stroke="#3376c6"></line></svg>
+                        ) : (
+                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7e848e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        )}
+                     </div>
+                     <span className="text-[9px] lg:text-[10px] font-semibold text-gray-800">{item}</span>
                    </div>
-                   <span className="text-[9px] lg:text-[10px] font-semibold text-gray-800">Data & Analytics</span>
-                 </div>
-                 <div className="flex items-center gap-3">
-                   <div className="w-6 h-6 bg-[#3376c6]/5 rounded-lg flex items-center justify-center group-hover:bg-[#3376c6]/10 transition-colors">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7e848e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13" stroke="#3376c6"></line><line x1="16" y1="17" x2="8" y2="17" stroke="#3376c6"></line></svg>
-                   </div>
-                   <span className="text-[9px] lg:text-[10px] font-semibold text-gray-800">Policy Evaluation</span>
-                 </div>
-                 <div className="flex items-center gap-3">
-                   <div className="w-6 h-6 bg-[#3376c6]/5 rounded-lg flex items-center justify-center group-hover:bg-[#3376c6]/10 transition-colors">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7e848e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                   </div>
-                   <span className="text-[9px] lg:text-[10px] font-semibold text-gray-800">Stakeholder Impact</span>
-                 </div>
+                 ))}
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -737,9 +703,17 @@ const AppContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showPreloader, setShowPreloader] = useState(true);
   const [appLoaded, setAppLoaded] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     document.title = "IIT Delhi CoE RA | Powering Clarity";
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handlePreloaderComplete = () => {
@@ -817,6 +791,12 @@ const AppContent = () => {
         .animate-marquee { animation: scroll 40s linear infinite; }
         .hover-pause:hover { animation-play-state: paused; }
         
+        @keyframes slow-pan {
+          from { transform: scale(1.05) translate(0, 0); }
+          to { transform: scale(1.05) translate(-2%, -2%); }
+        }
+        .animate-slow-pan { animation: slow-pan 30s ease-in-out alternate infinite; }
+
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-up { animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes dashDraw { to { stroke-dashoffset: 0; } }
@@ -835,7 +815,7 @@ const AppContent = () => {
 
       {showPreloader && (
         <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden transition-transform duration-[1.2s] ease-[cubic-bezier(0.76,0,0.24,1)] ${isLoading ? 'translate-y-0' : '-translate-y-[100vh] pointer-events-none'}`}>
-          <Preloader onComplete={handlePreloaderComplete} />
+          <PreloaderComponent onComplete={handlePreloaderComplete} />
         </div>
       )}
 
@@ -844,25 +824,40 @@ const AppContent = () => {
 
         <div className="relative z-10">
           
-          {/* Header */}
-          <header className={`fixed top-0 w-full z-[100] ${t.bg80} transition-all backdrop-blur-xl border-b border-[#7e848e]/10`}>
+          {/* Header - Dynamically adjusts to Immersive styling in V2 */}
+          <header className={`fixed top-0 w-full z-[100] transition-all duration-500 ${
+            t.isV2 
+              ? (isScrolled ? 'bg-gray-900/95 backdrop-blur-xl border-b border-white/10' : 'bg-transparent border-b border-transparent')
+              : (isScrolled ? `${t.bg90} backdrop-blur-xl border-b border-[#7e848e]/10 shadow-sm` : `${t.bg90} border-b border-[#7e848e]/10 shadow-sm`)
+          }`}>
             <div className="w-full px-[3%] py-3 flex justify-between items-center relative">
               <div className="flex items-center gap-4 cursor-pointer relative z-20">
+                {/* CoE RA Logo */}
                 <div className="flex items-center gap-3 group">
                   <div className="w-8 h-8 md:w-9 md:h-9 bg-[#3376c6] rounded-lg group-hover:bg-[#3376c6]/90 transition-colors duration-300 flex items-center justify-center shadow-sm">
-                     <span className="text-[#efefef] font-semibold text-sm">IIT</span>
+                     <span className="text-white font-semibold text-sm">IIT</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className={`font-semibold text-sm leading-tight transition-colors duration-500 ${t.isV2 ? 'text-white' : 'text-gray-900'}`}>CoE RA</span>
+                    <span className={`text-[9px] font-semibold tracking-widest uppercase transition-colors duration-500 ${t.isV2 ? 'text-white/70' : 'text-[#7e848e]'}`}>Regulatory Affairs</span>
                   </div>
                 </div>
-                <div className="w-px h-6 bg-[#7e848e]/30 hidden sm:block"></div>
-                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Indian_Institute_of_Technology_Delhi_Logo.svg/1280px-Indian_Institute_of_Technology_Delhi_Logo.svg.png" alt="IIT Delhi" className="h-8 object-contain hidden sm:block" />
+                {/* Separator Line */}
+                <div className={`w-px h-6 hidden sm:block transition-colors duration-500 ${t.isV2 ? 'bg-white/30' : 'bg-[#7e848e]/30'}`}></div>
+                {/* Official IIT Delhi Logo - Dynamically invert if V2 to stay visible on dark bg */}
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Indian_Institute_of_Technology_Delhi_Logo.svg/1280px-Indian_Institute_of_Technology_Delhi_Logo.svg.png" 
+                  alt="IIT Delhi" 
+                  className={`h-8 object-contain hidden sm:block transition-all duration-500 ${t.isV2 ? 'brightness-0 invert opacity-90' : ''}`} 
+                />
               </div>
               <nav className="hidden lg:flex items-center gap-8 h-full">
-                <ul className="flex gap-8 text-xs font-semibold text-[#7e848e] h-full items-center">
+                <ul className={`flex gap-8 text-xs font-semibold h-full items-center transition-colors duration-500 ${t.isV2 ? 'text-white/90' : 'text-[#7e848e]'}`}>
                   {navItems.map((item) => (
-                    <li key={item.label} className="group py-5 hover:text-[#3376c6] transition-colors cursor-pointer flex items-center gap-1">
+                    <li key={item.label} className={`group py-5 transition-colors cursor-pointer flex items-center gap-1 relative ${t.isV2 ? 'hover:text-white' : 'hover:text-[#3376c6]'}`}>
                       <span>{item.label}</span>
                       {item.hasMega && (
-                        <svg className="w-3 h-3 transition-transform duration-300 group-hover:-rotate-180 text-[#7e848e] group-hover:text-[#3376c6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                        <svg className={`w-3 h-3 transition-transform duration-300 group-hover:-rotate-180 ${t.isV2 ? 'text-white/70 group-hover:text-white' : 'text-[#7e848e] group-hover:text-[#3376c6]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
                       )}
                       
                       {/* Dark Luxury Mega Menu Dropdown */}
@@ -877,7 +872,7 @@ const AppContent = () => {
                                   <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 text-white/70 group-hover/link:bg-[#3376c6] group-hover/link:border-[#3376c6] group-hover/link:text-white transition-all duration-300 shadow-sm group-hover/link:shadow-[0_0_15px_rgba(51,118,198,0.5)]">
                                     <MenuIcon type={subItem.icon} />
                                   </div>
-                                  <div className="flex flex-col gap-1 mt-0.5">
+                                  <div className="flex flex-col gap-1 mt-0.5 text-left">
                                     <span className="text-white font-semibold text-sm group-hover/link:text-[#3376c6] transition-colors">{subItem.name}</span>
                                     <span className="text-white/50 text-[11px] leading-relaxed font-mono">{subItem.desc}</span>
                                   </div>
@@ -892,7 +887,7 @@ const AppContent = () => {
                               </div>
                               <div className="relative z-10 flex flex-col items-start gap-2">
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-[#3376c6] bg-[#3376c6]/20 px-2 py-1 rounded-md border border-[#3376c6]/30">{item.megaContent.featured.subtitle}</span>
-                                <h3 className="text-white font-semibold text-lg leading-tight mt-2 group-hover/feat:text-[#3376c6] transition-colors">{item.megaContent.featured.title}</h3>
+                                <h3 className="text-white font-semibold text-lg leading-tight mt-2 group-hover/feat:text-[#3376c6] transition-colors text-left">{item.megaContent.featured.title}</h3>
                                 <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-white/70 group-hover/feat:text-white transition-colors">{item.megaContent.featured.linkText} <span className="group-hover/feat:translate-x-1 transition-transform">→</span></div>
                               </div>
                             </div>
@@ -905,64 +900,135 @@ const AppContent = () => {
                 <div className="px-5 py-2.5 bg-[#3376c6] hover:bg-[#3376c6]/90 text-white rounded-lg transition-all shadow-sm text-xs font-semibold cursor-pointer relative z-20">Partner With Us</div>
               </nav>
 
-              <div className="lg:hidden w-9 h-9 bg-white/50 border border-[#7e848e]/20 rounded-lg flex items-center justify-center flex-col gap-1.5 shadow-sm cursor-pointer hover:bg-white transition-colors z-20">
-                 <div className="w-4 h-0.5 bg-gray-900 rounded"></div>
-                 <div className="w-4 h-0.5 bg-gray-900 rounded"></div>
+              <div className={`lg:hidden w-9 h-9 border rounded-lg flex items-center justify-center flex-col gap-1.5 shadow-sm cursor-pointer transition-colors z-20 ${t.isV2 ? 'bg-white/10 border-white/20 hover:bg-white/20' : 'bg-white/50 border-[#7e848e]/20 hover:bg-white'}`}>
+                 <div className={`w-4 h-0.5 rounded transition-colors ${t.isV2 ? 'bg-white' : 'bg-gray-900'}`}></div>
+                 <div className={`w-4 h-0.5 rounded transition-colors ${t.isV2 ? 'bg-white' : 'bg-gray-900'}`}></div>
               </div>
             </div>
           </header>
 
           {/* 1. Hero Section */}
-          <section className="relative h-screen pt-24 pb-8 flex flex-col justify-center overflow-hidden">
-            {/* Dynamic Pattern V1 vs V2 */}
-            <div className={`absolute inset-0 pointer-events-none mix-blend-multiply [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)] z-0 ${t.isV2 ? 'opacity-80' : 'opacity-40'}`}>
-               <div className={`absolute inset-0 animate-[grid-pan_15s_linear_infinite] ${t.isV2 ? 'bg-draft-grid-v2' : 'bg-draft-grid'}`}></div>
-            </div>
-            
-            <div className="absolute top-1/4 -left-64 w-[600px] h-[600px] bg-[#3376c6] opacity-[0.03] rounded-full blur-[120px] pointer-events-none"></div>
+          {t.isV2 ? (
+            <section className="relative h-screen w-full flex flex-col justify-center overflow-hidden bg-gray-900 rounded-b-[15px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] z-20">
+              <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <div 
+                  className="absolute -top-[20%] left-0 right-0 h-[140%] w-full"
+                  style={{ transform: `translateY(${scrollY * 0.4}px)` }}
+                >
+                  <video 
+                    src="https://video.wixstatic.com/video/548938_56a38724db194b778556a840da01bfe0/1080p/mp4/file.mp4" 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline
+                    className="w-full h-full object-cover opacity-50" 
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-900/95 via-gray-900/80 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-gray-900/60"></div>
+              </div>
 
-            <div className="w-full px-[3%] flex-grow flex flex-col justify-center relative z-10">
-              <div className="grid lg:grid-cols-[11fr_9fr] gap-8 lg:gap-12 items-center w-full h-full max-w-[96rem] mx-auto">
-                <div className="flex flex-col items-start w-full order-2 lg:order-1 justify-center py-4 lg:py-8 lg:pr-8">
-                  <Reveal active={appLoaded} delay={0}>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#3376c6]/10 border border-[#3376c6]/20 mb-6">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#3376c6] animate-pulse"></span>
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-[#3376c6]">IIT Delhi Centre of Excellence in Regulatory Affairs</span>
-                    </div>
-                  </Reveal>
-                  <Reveal active={appLoaded} delay={100} className="w-full">
-                    <h1 className="text-4xl md:text-5xl lg:text-[3.2rem] xl:text-[3.8rem] font-semibold text-gray-900 leading-[1.1] mb-6 tracking-tight">
-                      Driving Excellence in <br className="hidden lg:block" /> Power Sector Regulation
-                    </h1>
-                  </Reveal>
-                  <Reveal active={appLoaded} delay={200} className="w-full">
-                    <div className="text-[#7e848e] mb-10 max-w-xl xl:max-w-2xl flex flex-col gap-4">
-                      <p>At the centre of India's evolving power landscape, we bring together regulatory science and real-world insight to shape how frameworks are built, tested, and applied.</p>
-                      <p>Established by IIT Delhi with CERC and Grid India, the CoE advances evidence-based regulatory systems—bringing clarity to complexity across markets and grid operations.</p>
-                    </div>
-                  </Reveal>
-                  <Reveal active={appLoaded} delay={300} className="w-full">
-                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                      <div className="w-full sm:w-auto px-6 py-3 bg-[#3376c6] hover:bg-[#3376c6]/90 text-white rounded-lg transition-all cursor-pointer flex items-center justify-center font-semibold text-sm">Explore Research</div>
-                      <div className={`w-full sm:w-auto px-6 py-3 ${t.bg} hover:bg-white text-[#3376c6] rounded-lg transition-all cursor-pointer border border-[#7e848e]/20 flex items-center justify-center font-semibold text-sm`}>Learn More</div>
-                    </div>
-                  </Reveal>
-                  <Reveal active={appLoaded} delay={400} className="w-full mt-10 pt-8 border-t border-[#7e848e]/20 hidden sm:block max-w-xl">
-                    <div className="flex items-center justify-between w-full pr-4">
-                      <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-gray-900">5+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Regional Grids</span></div>
-                      <div className="w-px h-8 bg-[#7e848e]/20"></div>
-                      <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-gray-900">120+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Policy Briefs</span></div>
-                      <div className="w-px h-8 bg-[#7e848e]/20"></div>
-                      <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-gray-900">15+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Active Sandboxes</span></div>
-                    </div>
+              <div className="w-full px-[3%] flex-grow flex flex-col justify-center relative z-10 pt-24">
+                <div className="w-full max-w-[96rem] mx-auto">
+                  <div className="max-w-3xl flex flex-col items-start">
+                    <Reveal active={appLoaded} delay={0}>
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 border border-white/20 mb-6 backdrop-blur-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#3376c6] animate-pulse shadow-[0_0_8px_rgba(51,118,198,0.8)]"></span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white">IIT Delhi Centre of Excellence in Regulatory Affairs</span>
+                      </div>
+                    </Reveal>
+                    
+                    <Reveal active={appLoaded} delay={100}>
+                      <h1 className="text-4xl md:text-5xl lg:text-[4rem] xl:text-[4.5rem] font-semibold text-white leading-[1.1] mb-6 tracking-tight drop-shadow-lg">
+                        Powering Clarity in <br className="hidden lg:block" /> India's Grid Evolution
+                      </h1>
+                    </Reveal>
+                    
+                    <Reveal active={appLoaded} delay={200}>
+                      <div className="text-white/80 mb-10 text-lg md:text-xl flex flex-col gap-4 max-w-2xl font-light">
+                        <p>
+                          Advancing evidence-based regulatory systems at the intersection of research, policy, and real-time operations.
+                        </p>
+                      </div>
+                    </Reveal>
+                    
+                    <Reveal active={appLoaded} delay={300}>
+                      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        <div className="w-full sm:w-auto px-8 py-4 bg-[#3376c6] hover:bg-[#3376c6]/90 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(51,118,198,0.3)] text-white rounded-xl transition-all duration-300 cursor-pointer flex items-center justify-center font-bold text-sm">
+                           Explore Research Frameworks
+                        </div>
+                        <div className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md hover:-translate-y-0.5 hover:shadow-lg text-white rounded-xl transition-all duration-300 cursor-pointer border border-white/20 flex items-center justify-center font-bold text-sm">
+                           Partner With Us
+                        </div>
+                      </div>
+                    </Reveal>
+
+                    {/* V2 Specific Impact Stats */}
+                    <Reveal active={appLoaded} delay={400} className="w-full mt-12 pt-8 border-t border-white/20 hidden sm:block max-w-xl">
+                      <div className="flex items-center justify-between w-full pr-4">
+                        <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-white">5+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Regional Grids</span></div>
+                        <div className="w-px h-8 bg-white/20"></div>
+                        <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-white">120+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Policy Briefs</span></div>
+                        <div className="w-px h-8 bg-white/20"></div>
+                        <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-white">15+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Active Sandboxes</span></div>
+                      </div>
+                    </Reveal>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <section className="relative h-screen pt-24 pb-8 flex flex-col justify-center overflow-hidden border-b border-[#7e848e]/20">
+              {/* Animated panning grid background */}
+              <div className={`absolute inset-0 pointer-events-none mix-blend-multiply [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)] z-0 opacity-40`}>
+                 <div className={`absolute inset-0 animate-[grid-pan_15s_linear_infinite] bg-draft-grid`}></div>
+              </div>
+              
+              <div className="absolute top-1/4 -left-64 w-[600px] h-[600px] bg-[#3376c6] opacity-[0.03] rounded-full blur-[120px] pointer-events-none"></div>
+
+              <div className="w-full px-[3%] flex-grow flex flex-col justify-center relative z-10">
+                <div className="grid lg:grid-cols-[11fr_9fr] gap-8 lg:gap-12 items-center w-full h-full max-w-[96rem] mx-auto">
+                  <div className="flex flex-col items-start w-full order-2 lg:order-1 justify-center py-4 lg:py-8 lg:pr-8">
+                    <Reveal active={appLoaded} delay={0}>
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#3376c6]/10 border border-[#3376c6]/20 mb-6">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#3376c6] animate-pulse"></span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-[#3376c6]">IIT Delhi Centre of Excellence in Regulatory Affairs</span>
+                      </div>
+                    </Reveal>
+                    <Reveal active={appLoaded} delay={100} className="w-full">
+                      <h1 className="text-4xl md:text-5xl lg:text-[3.2rem] xl:text-[3.8rem] font-semibold text-gray-900 leading-[1.1] mb-6 tracking-tight">
+                        Driving Excellence in <br className="hidden lg:block" /> Power Sector Regulation
+                      </h1>
+                    </Reveal>
+                    <Reveal active={appLoaded} delay={200} className="w-full">
+                      <div className="text-[#7e848e] mb-10 max-w-xl xl:max-w-2xl flex flex-col gap-4">
+                        <p>At the centre of India's evolving power landscape, we bring together regulatory science and real-world insight to shape how frameworks are built, tested, and applied.</p>
+                        <p>Established by IIT Delhi with CERC and Grid India, the CoE advances evidence-based regulatory systems—bringing clarity to complexity across markets and grid operations.</p>
+                      </div>
+                    </Reveal>
+                    <Reveal active={appLoaded} delay={300} className="w-full">
+                      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        <div className="w-full sm:w-auto px-6 py-3 bg-[#3376c6] hover:bg-[#3376c6]/90 text-white rounded-lg transition-all cursor-pointer flex items-center justify-center font-semibold text-sm">Explore Research</div>
+                        <div className={`w-full sm:w-auto px-6 py-3 ${t.bg} hover:bg-white text-[#3376c6] rounded-lg transition-all cursor-pointer border border-[#7e848e]/20 flex items-center justify-center font-semibold text-sm`}>Learn More</div>
+                      </div>
+                    </Reveal>
+                    <Reveal active={appLoaded} delay={400} className="w-full mt-10 pt-8 border-t border-[#7e848e]/20 hidden sm:block max-w-xl">
+                      <div className="flex items-center justify-between w-full pr-4">
+                        <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-gray-900">5+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Regional Grids</span></div>
+                        <div className="w-px h-8 bg-[#7e848e]/20"></div>
+                        <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-gray-900">120+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Policy Briefs</span></div>
+                        <div className="w-px h-8 bg-[#7e848e]/20"></div>
+                        <div className="flex flex-col gap-1"><span className="text-2xl font-bold text-gray-900">15+</span><span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Active Sandboxes</span></div>
+                      </div>
+                    </Reveal>
+                  </div>
+                  <Reveal active={appLoaded} delay={200} className="order-1 lg:order-2 w-full h-full min-h-[300px] lg:min-h-[450px]">
+                    <HeroShowcase variant="v1" />
                   </Reveal>
                 </div>
-                <Reveal active={appLoaded} delay={200} className="order-1 lg:order-2 w-full h-full min-h-[300px] lg:min-h-[450px]">
-                  <HeroShowcase />
-                </Reveal>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* 2. Trusted Partners Strip */}
           <section className={`${t.bg} py-8 overflow-hidden shadow-none border-0`}>
@@ -970,7 +1036,7 @@ const AppContent = () => {
               <div className="text-center mb-6 px-[3%] max-w-[96rem] mx-auto">
                  <span className="text-[10px] font-semibold uppercase tracking-widest text-[#7e848e]">Aligned with institutions driving power sector reform</span>
               </div>
-              <div className="flex w-full overflow-hidden mt-2" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
+              <div className="flex w-full overflow-hidden mt-2" style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}>
                 <div className="flex animate-marquee whitespace-nowrap min-w-full">
                   <div className="flex gap-16 md:gap-32 px-[3%] items-center w-full justify-start">
                     {['CERC', 'Grid India', 'Ministry of Power', 'CEA', 'POSOCO', 'IIT Delhi'].map((p, i) => <div key={`s1-${i}`} className="text-xl font-semibold text-[#7e848e] hover:text-[#3376c6] cursor-pointer flex-shrink-0">{p}</div>)}
@@ -982,6 +1048,54 @@ const AppContent = () => {
               </div>
             </Reveal>
           </section>
+          
+          {/* NEW SECTION FOR V2: Mapping the Regulatory Ecosystem (Using V1 Hero layout) */}
+          {t.isV2 && (
+            <section className={`py-16 md:py-24 border-b border-[#7e848e]/20 flex flex-col justify-center overflow-hidden ${t.bg} relative`}>
+              <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)] z-0">
+                 <div className={`absolute inset-0 animate-[grid-pan_15s_linear_infinite] ${t.isV2 ? 'bg-draft-grid-v2' : 'bg-draft-grid'}`}></div>
+              </div>
+              
+              <div className="w-full px-[3%] flex-grow flex flex-col justify-center relative z-10">
+                <div className="grid lg:grid-cols-[11fr_9fr] gap-8 lg:gap-12 items-center w-full max-w-[96rem] mx-auto">
+                  <div className="flex flex-col items-start w-full order-2 lg:order-1 justify-center py-4 lg:py-8 lg:pr-8">
+                    
+                    <Reveal>
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#3376c6]/10 border border-[#3376c6]/20 mb-6">
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-[#3376c6]">System Architecture</span>
+                      </div>
+                    </Reveal>
+                    
+                    <Reveal delay={100} className="w-full">
+                      <h2 className="text-3xl md:text-5xl font-semibold text-gray-900 leading-[1.1] mb-6 tracking-tight">
+                        Mapping the <br className="hidden lg:block" /> Regulatory Ecosystem
+                      </h2>
+                    </Reveal>
+                    
+                    <Reveal delay={200} className="w-full">
+                      <div className="text-[#7e848e] mb-10 max-w-xl text-lg flex flex-col gap-4">
+                        <p>
+                          Explore the interconnected layers of India's power markets. From real-time frequency stabilization to long-term resource adequacy, our framework models the physical and economic realities of the grid to design adaptive policies.
+                        </p>
+                      </div>
+                    </Reveal>
+                    
+                    <Reveal delay={300} className="w-full">
+                      <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        <div className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-gray-50 text-[#3376c6] rounded-lg transition-all cursor-pointer border border-[#7e848e]/20 hover:border-[#3376c6]/50 flex items-center justify-center font-semibold text-sm shadow-sm hover:shadow-md">
+                           View Methodology
+                        </div>
+                      </div>
+                    </Reveal>
+                  </div>
+                  
+                  <Reveal delay={200} className="order-1 lg:order-2 w-full h-full min-h-[300px] lg:min-h-[450px]">
+                    <HeroShowcase variant="v2" />
+                  </Reveal>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* 3. Core Pillars / Services */}
           <section className="py-16 md:py-24 w-full">
